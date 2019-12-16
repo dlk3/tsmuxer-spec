@@ -1,0 +1,18 @@
+#!/usr/bin/env bash
+
+set -e
+
+if [ $(cat /etc/hostname) == "fang.localdomain" ]; then
+	echo "Building $NAME in fedora-rpmbuild:30 container ..."
+	podman run --interactive --name=rpmbuild --rm --tty --volume=${HOME}:${HOME} localhost/fedora-rpmbuild:30 "$(realpath "$0")"
+	echo "Building $NAME in fedora-rpmbuild:31 container ..."
+	podman run --interactive --name=rpmbuild --rm --tty --volume=${HOME}:${HOME} fedora-rpmbuild:31 "$(realpath "$0")"
+else
+	echo "Update system software ..."
+	dnf -y upgrade
+
+	rpmbuild -ba "/home/dlk/src/tsmuxer-spec/tsmuxer.spec"
+	mv /root/rpmbuild/RPMS/x86_64/*.rpm /home/dlk/rpmbuild/RPMS/x86_64/
+	mv /root/rpmbuild/SRPMS/*.rpm /home/dlk/rpmbuild/SRPMS/
+fi
+
