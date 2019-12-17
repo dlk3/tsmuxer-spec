@@ -1,0 +1,11 @@
+[Desktop Entry]
+Version=1.0
+Name=tsMuxerGUI
+GenericName=Transmission Stream Muxer
+Comment=tsMuxeR GUI
+Exec=/usr/bin/tsMuxerGUI
+TryExec=/usr/bin/tsMuxerGUI
+Icon=tsmuxer
+Terminal=false
+Type=Application
+Categories=AudioVideo;Qt;
