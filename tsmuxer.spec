@@ -30,8 +30,8 @@ Supported audio codecs AAC, AC3 / E-AC3(DD+), DTS/ DTS-HD.
 %setup
 cp "%{SOURCE1}" %{_builddir}/%{name}-%{version}/
 
-
 %build
+cd %{_builddir}/%{name}-%{version}
 ./rebuild_linux_with_gui.sh
 
 
