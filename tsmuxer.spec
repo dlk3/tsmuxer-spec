@@ -2,8 +2,8 @@
 
 Name:		tsmuxer
 Version:	2.6.15
-Release:	1%{?dist}
-Summary:	tsMuxeR is a simple program to mux video to TS/M2TS files or create BD disks.
+Release:	2%{?dist}
+Summary:	tsMuxer is a simple program to mux video to TS/M2TS files or create BD disks.
 
 License:	Apache-2.0
 URL:		https://github.com/justdan96/tsMuxer
@@ -40,6 +40,7 @@ install -m 644 -t %{buildroot}%{_datadir}/applications tsMuxerGUI.desktop
 mkdir -p %{buildroot}%{_datadir}/icons/hicolor/128x128
 install -m 644 tsMuxerGUI/images/icon.png %{buildroot}%{_datadir}/icons/hicolor/128x128/tsMuxerGUI.png
 
+
 %files
 %license LICENSE
 %doc README.md
@@ -50,8 +51,7 @@ install -m 644 tsMuxerGUI/images/icon.png %{buildroot}%{_datadir}/icons/hicolor/
 
 
 %changelog
-* Mon Dec 16 2019 David King <dave@daveking.com> - 2.6.15-1
-- Initial Version
+* Mon Dec 16 2019 David King <dave@daveking.com> - 2.6.15-2
 - Add tsMuxerGUI along with associated desktop file
 * Tue Dec 10 2019 David King <dave@daveking.com> - 2.6.15-1
 - Initial Version
