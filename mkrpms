@@ -21,12 +21,12 @@ sed -i "s/^Version:.*/Version:\t${VERSION}/" "$SPECFILE"
 #  Build a tar.gz archive of the source code and put it in our SOURCES dir
 git archive --format=tar.gz --prefix=${NAME}-${VERSION}/ --output=${HOME}/rpmbuild/SOURCES/${NAME}-${VERSION}.tar.gz master
 
-#  Put the desktop file into the archive file
-wget -O $TMPDIR/tsMuxerGUI.desktop "https://github.com/dlk3/tsmuxer-spec/blob/master/tsMuxerGUI.desktop"
-tar --append -f ${HOME}/rpmbuild/SOURCES/${NAME}-${VERSION}.tar.gz --transform "s|$TMPDIR|${NAME}-${VERSION}|" $TMPDIR/tsMuxerGUI.desktop
-
 #  Remove the temporary directory
 rm -fr $TMPDIR
+
+#  Put the desktop file in the SOURCES directory
+SOURCE1=$(sed -n 's/^Source1:[[:space:]]*//p' "$SPECFILE")
+wget -O ${HOME}/rpmbuild/SOURCES/tsMuxerGUI.desktop "$SOURCE1"
 
 #  Build the packages
 rpmbuild -ba "$SPECFILE"

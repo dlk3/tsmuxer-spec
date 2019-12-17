@@ -8,6 +8,7 @@ Summary:	tsMuxeR is a simple program to mux video to TS/M2TS files or create BD 
 License:	Apache-2.0
 URL:		https://github.com/justdan96/tsMuxer
 Source0:	%{name}-%{version}.tar.gz
+Source1:	https://github.com/dlk3/tsmuxer-spec/blob/master/tsMuxerGUI.desktop
 BuildArch:	x86_64
 
 
@@ -23,6 +24,7 @@ Supported audio codecs AAC, AC3 / E-AC3(DD+), DTS/ DTS-HD.
 
 %prep
 %setup
+cp "%{SOURCE1}" %{_builddir}/%{name}-%{version}/
 
 
 %build
@@ -33,13 +35,18 @@ Supported audio codecs AAC, AC3 / E-AC3(DD+), DTS/ DTS-HD.
 mkdir -p %{buildroot}%{_bindir}
 install -m 755 -t %{buildroot}%{_bindir} build/tsMuxer/tsmuxer
 install -m 755 -t %{buildroot}%{_bindir} build/tsMuxerGUI/tsMuxerGUI
-
+mkdir -p %{buildroot}%{_datadir}/applications
+install -m 644 -t %{buildroot}%{_datadir}/applications tsMuxerGUI.desktop
+mkdir -p %{buildroot}%{_datadir}/icons/hicolor/128x128
+install -m 644 tsMuxerGUI/images/icon.png %{buildroot}%{_datadir}/icons/hicolor/128x128/tsMuxerGUI.png
 
 %files
 %license LICENSE
 %doc README.md
 %{_bindir}/tsmuxer
 %{_bindir}/tsMuxerGUI
+%{_datadir}/applications/tsMuxerGUI.desktop
+%{_datadir}/icons/hicolor/128x128/tsMuxerGUI.png
 
 
 %changelog
