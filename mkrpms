@@ -1,33 +1,53 @@
 #!/usr/bin/env bash
 
-#  Get the full path to the spec file
-SPECFILE=$(dirname "$(realpath "$0")")/tsmuxer.spec
+set -e
 
-#  Parse the package name out of the spec file
-NAME=$(sed -n 's/^Name:[[:space:]]*//p' "$SPECFILE")
+if [ $(cat /etc/hostname) == "fang.localdomain" ]; then
+        echo "Building $NAME in fedora-rpmbuild:30 container ..."
+        podman run --interactive --name=rpmbuild --rm --tty --volume=${HOME}:${HOME} localhost/fedora-rpmbuild:30 "$(realpath "$0")"
+        echo "Building $NAME in fedora-rpmbuild:31 container ..."
+        podman run --interactive --name=rpmbuild --rm --tty --volume=${HOME}:${HOME} fedora-rpmbuild:31 "$(realpath "$0")"
+else
+        echo "Update system software ..."
+        dnf -y upgrade
+	dnf -y install wget ninja-build cmake zlib-devel freetype-devel qt5-devel
 
-#  Clone the source from git into a temp file
-TMPDIR=$(mktemp -d)
-cd $TMPDIR
-git clone https://github.com/justdan96/tsMuxer.git
+	#  Get the full path to the spec file
+	SPECFILE=$(dirname "$(realpath "$0")")/tsmuxer.spec
 
-#  Get the program version number from the code
-cd tsMuxer
-VERSION=$(grep "APP_VERSION =" tsMuxer/main.cpp | sed 's/[^"]*"\([^"]*\)".*/\1/')
+	#  Parse the package name out of the spec file
+	NAME=$(sed -n 's/^Name:[[:space:]]*//p' "$SPECFILE")
 
-#  Modify the spec file to set the current version number
-sed -i "s/^Version:.*/Version:\t${VERSION}/" "$SPECFILE"
+	#  Clone the source from git into a temp file
+	TMPDIR=$(mktemp -d)
+	cd $TMPDIR
+	git clone https://github.com/justdan96/tsMuxer.git
 
-#  Build a tar.gz archive of the source code and put it in our SOURCES dir
-git archive --format=tar.gz --prefix=${NAME}-${VERSION}/ --output=${HOME}/rpmbuild/SOURCES/${NAME}-${VERSION}.tar.gz master
+	#  Get the program version number from the code
+	cd tsMuxer
+	VERSION=$(grep "APP_VERSION =" tsMuxer/main.cpp | sed 's/[^"]*"\([^"]*\)".*/\1/')
 
-#  Remove the temporary directory
-rm -fr $TMPDIR
+	#  Modify the spec file to set the current version number
+	sed -i "s/^Version:.*/Version:\t${VERSION}/" "$SPECFILE"
 
-#  Put the desktop file in the SOURCES directory
-SOURCE1=$(sed -n 's/^Source1:[[:space:]]*//p' "$SPECFILE")
-wget -O ${HOME}/rpmbuild/SOURCES/tsMuxerGUI.desktop "$SOURCE1"
+	#  Build a tar.gz archive of the source code and put it in our SOURCES dir
+	git archive --format=tar.gz --prefix=${NAME}-${VERSION}/ --output=${HOME}/rpmbuild/SOURCES/${NAME}-${VERSION}.tar.gz master
 
-#  Build the packages
-rpmbuild -ba "$SPECFILE"
+	#  Remove the temporary directory
+	rm -fr $TMPDIR
+
+	#  Put the desktop file in the SOURCES directory
+	SOURCE1=$(sed -n 's/^Source1:[[:space:]]*//p' "$SPECFILE")
+	wget -O ${HOME}/rpmbuild/SOURCES/tsMuxerGUI.desktop "$SOURCE1"
+
+	#  Build the packages
+	rpmbuild -ba "$SPECFILE"
+
+	#  Save the RPMs
+	echo "Copying RPM files to host system ..."
+	mv /root/rpmbuild/RPMS/x86_64/*.rpm /home/dlk/rpmbuild/RPMS/x86_64/
+	mv /root/rpmbuild/SRPMS/*.rpm /home/dlk/rpmbuild/SRPMS/
+fi
+
+
 

@@ -1,6 +1,6 @@
 %define debug_package %{nil}
 
-Name:		tsmuxer
+Name:		tsMuxer
 Version:	2.6.15
 Release:	2%{?dist}
 Summary:	tsMuxer is a simple program to mux video to TS/M2TS files or create BD disks.
@@ -13,6 +13,10 @@ BuildArch:	x86_64
 
 
 BuildRequires:	ninja-build
+BuildRequires:	cmake
+BuildRequires:	zlib-devel
+BuildRequires:	freetype-devel
+BuildRequires:	qt5-devel
 
 
 %description
