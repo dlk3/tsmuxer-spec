@@ -20,10 +20,10 @@ if [ $(cat /etc/hostname) == "fang.localdomain" ]; then
 	#  The version number set in the SPEC file may have changed during the build so get it again 
 	VERSION=$(sed -n 's/^Version:[[:space:]]*//p' "$SPECFILE")
 
-	echo "Test installation of RPM in fedora-rpmbuild:30 container ..."
+	echo "Test installation of ${NAME}-${VERSION}-${RELEASE}.fc30.x86_64.rpm in fedora-rpmbuild:30 container ..."
 	podman run --interactive --name=rpmbuild --rm --tty --volume=${HOME}:${HOME} localhost/fedora-rpmbuild:30 dnf install -y ${HOME}/rpmbuild/RPMS/x86_64/${NAME}-${VERSION}-${RELEASE}.fc30.x86_64.rpm
 
-	echo "Test installation of RPM in fedora-rpmbuild:31 container ..."
+	echo "Test installation of ${NAME}-${VERSION}-${RELEASE}.fc31.x86_64.rpm in fedora-rpmbuild:31 container ..."
 	podman run --interactive --name=rpmbuild --rm --tty --volume=${HOME}:${HOME} localhost/fedora-rpmbuild:31 dnf install -y ${HOME}/rpmbuild/RPMS/x86_64/${NAME}-${VERSION}-${RELEASE}.fc31.x86_64.rpm
 else
         echo "Update system software ..."
