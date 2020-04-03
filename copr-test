@@ -1,0 +1,73 @@
+#!/usr/bin/env sh
+
+#  This Source Code Form is subject to the terms of the Mozilla Public
+#  License, v. 2.0. If a copy of the MPL was not distributed with this
+#  file, You can obtain one at https://mozilla.org/MPL/2.0/.
+
+set -e
+
+if [ $(cat /etc/hostname) == "fang.localdomain" ]; then
+
+	podman run --interactive --name=rpmbuild --rm --tty --volume=${HOME}:${HOME} docker.io/library/fedora:31 "$(realpath "$0")"
+	
+else
+
+	#  Make the container look like a COPR environment
+	dnf groupinstall -y "Development Tools" "RPM Development Tools"
+	dnf upgrade -y
+	mkdir -p ${HOME}/rpmbuild/BUILD
+	mkdir -p ${HOME}/rpmbuild/BUILDROOT
+	mkdir -p ${HOME}/rpmbuild/RPMS
+	mkdir -p ${HOME}/rpmbuild/SOURCES
+	mkdir -p ${HOME}/rpmbuild/SPECS
+	mkdir -p ${HOME}/rpmbuild/SRPMS
+	mkdir /tmp/copr-test
+	cd /tmp/copr-test
+
+	#  COPR: Installing packages required by the custom script
+	dnf install -y git
+	
+	#  COPR: The custom script that gets/creates the sources and the spec file
+	SPECFILE="tsmuxer.spec"
+	git clone https://github.com/dlk3/tsmuxer-spec.git
+	mv tsmuxer-spec/${SPECFILE} .
+	mv tsmuxer-spec/tsMuxerGUI.desktop .
+	rm -fr tsmuxer-spec
+	git clone https://github.com/justdan96/tsMuxer.git
+	VERSION=$(grep "set(VERSION_NUMBER " tsMuxer/CMakeLists.txt | sed 's/[^"]*"\([^"]*\)".*/\1/')
+	sed -i "s/^Version:.*/Version:\t${VERSION}/" ${SPECFILE}
+	NAME=$(sed -n 's/^Name:[[:space:]]*//p' ${SPECFILE})
+	mv tsMuxer ${NAME}-${VERSION}
+	tar -czf ${NAME}-${VERSION}.tar.gz ${NAME}-${VERSION}
+
+	#  Parse the package name, version, release, sources and architecture
+	#  out of the spec file
+	#NAME=$(sed -n 's/^Name:[[:space:]]*//p' "$SPECFILE")
+	#cd /tmp/VERSION=$(sed -n 's/^Version:[[:space:]]*//p' "$SPECFILE")
+	RELEASE=$(sed -n 's/^Release:[[:space:]]*//;s/%{?dist}//p' "$SPECFILE")
+	SOURCE0=$(sed -n 's/^Source0:[[:space:]]*//p' "$SPECFILE")
+	SOURCE0=$(echo $SOURCE0 | sed "s/%{name}/${NAME}/g;s/%{version}/${VERSION}/g")
+	ARCH=$(sed -n 's/^BuildArch:[[:space:]]*//p' "$SPECFILE")
+
+	#  Install the BuildRequires packages listed in the spec file
+	PACKAGES=''
+	oIFS=$IFS
+	IFS=$'\n'
+	for LINE in `grep ^BuildRequires: $SPECFILE`; do 
+		PACKAGES+=`echo $LINE | awk '{print $2" "}'`
+	done
+	IFS=$oIFS
+	[ "$PACKAGES" != "" ] && dnf install -y $PACKAGES
+	
+	#  Move the source files into place in the ${HOME}/rpmbuild tree
+	mv /tmp/copr-test/${SPECFILE} ${HOME}/rpmbuild/SPECS/
+	mv /tmp/copr-test/${NAME}-${VERSION}.tar.gz ${HOME}/rpmbuild/SOURCES/
+	mv /tmp/copr-test/tsMuxerGUI.desktop ${HOME}/rpmbuild/SOURCES/
+
+	#  Build the package ...
+	rpmbuild -ba "${HOME}/rpmbuild/SPECS/$SPECFILE"
+
+	#  Test the package installation
+	dnf install -y ${HOME}/rpmbuild/RPMS/$ARCH/${NAME}-${VERSION}-${RELEASE}.*.${ARCH}.rpm
+	
+fi
