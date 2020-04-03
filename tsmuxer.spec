@@ -38,9 +38,9 @@ cd %{_builddir}/%{name}-%{version}
 %install
 mkdir -p %{buildroot}%{_bindir}
 install -m 755 -t %{buildroot}%{_bindir} build/tsMuxer/tsmuxer
-ln -s tsMuxer %{buildroot}%{_bindir}/tsmuxer
+ln -s tsmuxer %{buildroot}%{_bindir}/tsMuxer
 install -m 755 -t %{buildroot}%{_bindir} build/tsMuxerGUI/tsMuxerGUI
-ln -s tsmuxergui %{buildroot}%{_bindir}/tsMuxerGUI
+ln -s tsMuxerGUI %{buildroot}%{_bindir}/tsmuxergui
 mkdir -p %{buildroot}%{_datadir}/applications
 install -m 644 -t %{buildroot}%{_datadir}/applications tsMuxerGUI.desktop
 mkdir -p %{buildroot}%{_datadir}/icons/hicolor/128x128
