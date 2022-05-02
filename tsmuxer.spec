@@ -16,7 +16,10 @@ BuildRequires:	ninja-build
 BuildRequires:	cmake
 BuildRequires:	zlib-devel
 BuildRequires:	freetype-devel
-BuildRequires:	qt5-devel
+BuildRequires:	qt5-qtbase-devel
+BuildRequires:  qt5-qttools-devel
+BuildRequires:  qt5-qtmultimedia-devel
+BuildRequires:  qt5-qtdeclarative-devel
 
 
 %description

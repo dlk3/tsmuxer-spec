@@ -5,10 +5,11 @@
 #  file, You can obtain one at https://mozilla.org/MPL/2.0/.
 
 set -e
+trap /bin/sh ERR
 
 if [ $(cat /etc/hostname) == "fang.localdomain" ]; then
 
-	podman run --interactive --name=rpmbuild --rm --tty --volume=${HOME}:${HOME} docker.io/library/fedora:31 "$(realpath "$0")"
+	podman run --interactive --name=rpmbuild --rm --tty --volume=${HOME}:${HOME} docker.io/library/fedora:latest "$(realpath "$0")"
 	
 else
 
